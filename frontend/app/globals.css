@@ -87,12 +87,8 @@
     @apply rounded-3xl border border-white/25 bg-white/10 p-5 backdrop-blur-sm sm:p-6 md:p-7;
   }
 
-  .why-now-kicker {
-    @apply text-xs font-semibold uppercase tracking-[0.12em] text-white/85 md:text-sm;
-  }
-
   .why-now-heading {
-    @apply mt-2 text-3xl font-semibold leading-tight text-white sm:text-4xl md:text-5xl;
+    @apply text-3xl font-semibold leading-tight text-white sm:text-4xl md:text-5xl;
   }
 
   .why-now-subtitle {

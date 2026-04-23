@@ -187,7 +187,6 @@ export default function Page() {
             <RevealSection>
               <div className="why-now-wrap">
                 <div className="why-now-heading-block">
-                  <p className="why-now-kicker">Ключевой акцент проекта</p>
                   <h2 className="why-now-heading">Почему это важно сейчас</h2>
                   <p className="why-now-subtitle">
                     Эти приоритеты напрямую влияют на качество жизни в городе уже сегодня и
