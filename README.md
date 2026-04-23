@@ -26,18 +26,23 @@ docker compose up --build
 cp .env.prod.example .env
 ```
 
-2. Заполните значения в `.env` (минимум: `POSTGRES_PASSWORD`, `DATABASE_URL`, `CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_API_BASE_URL`).
+2. Убедитесь, что DNS домена указывает на ваш сервер (A-запись), и откройте порты `80` и `443` в фаерволе.
 
-3. Запустите production-стек:
+3. Заполните значения в `.env` (минимум: `SITE_DOMAIN`, `POSTGRES_PASSWORD`, `DATABASE_URL`, `CORS_ALLOWED_ORIGINS`, `NEXT_PUBLIC_API_BASE_URL`).
+
+4. Запустите production-стек:
 
 ```bash
 docker compose -f docker-compose.prod.yml up --build -d
 ```
 
-4. Проверка:
+5. Проверка:
 
-- Frontend: `http://localhost:3000`
-- Backend healthcheck: `http://localhost:4000/health`
+- Frontend: `https://<ваш-домен>`
+- Backend healthcheck: `https://<ваш-домен>/health`
+- Export CSV: `https://<ваш-домен>/api/export?format=csv`
+
+> В production используется reverse proxy на Caddy (`Caddyfile`): фронтенд и бэкенд доступны только через HTTPS-домен, а API проксируется по пути `/api/*`.
 
 `backend-seed` используется только в dev-стеке (`docker-compose.yml`) и не входит в production-compose.
 
@@ -190,5 +195,5 @@ npm run build
 
 ### Выгрузка точек для заказчика
 
-Одобренные идеи хранятся в PostgreSQL в таблице `user_ideas` (поле `location` — PostGIS `geometry`). Для выгрузки без SQL у backend уже есть эндпоинт **`GET /api/export`**: параметр `format=csv` или `format=geojson` (по умолчанию GeoJSON). На хостинге откройте в браузере или через `curl`, подставив публичный URL API, например `https://ваш-api.example.com/api/export?format=csv`.
+Одобренные идеи хранятся в PostgreSQL в таблице `user_ideas` (поле `location` — PostGIS `geometry`). Для выгрузки без SQL у backend уже есть эндпоинт **`GET /api/export`**: параметр `format=csv` или `format=geojson` (по умолчанию GeoJSON). На хостинге откройте в браузере или через `curl`, подставив ваш домен, например `https://xn--80addcduaf0adsfzdz.xn--p1ai/api/export?format=csv`.
 
