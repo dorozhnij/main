@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend-seed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    working_dir: /app
+    # npm install: bind-mount затирает /app, том /app/node_modules часто пустой — без install нет ts-node
+    command: sh -lc "npm install && npm run migrate && npm run seed"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://app:app@postgres:5432/app
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: sh -lc "npm install && npm run dev"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DATABASE_URL=postgresql://app:app@postgres:5432/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend-seed:
+        condition: service_completed_successfully
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      # .next отдельно от bind-mount: иначе смесь кэша с хоста и Linux часто даёт
+      # «Cannot find module './766.js'» (несовпадение чанков и webpack-runtime).
+      - frontend_next:/app/.next
+    working_dir: /app
+    # --turbopack: webpack dev-сервер тянет чанки вроде ./766.js из .next/server;
+    # при битом/смешанном .next это даёт Cannot find module './766.js'. Turbopack обходит этот путь.
+    command: sh -lc "npm install && npm run dev -- -H 0.0.0.0 --turbopack"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  frontend_next:
+
+networks:
+  default:
+    driver: bridge
+

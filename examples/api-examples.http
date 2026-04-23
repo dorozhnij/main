@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:4000
+
+### Healthcheck
+GET {{baseUrl}}/health
+
+### Create idea (point)
+POST {{baseUrl}}/api/ideas
+Content-Type: application/json
+
+{
+  "title": "Новая пешеходная зона",
+  "description": "Сделать удобный маршрут между точками притяжения",
+  "status": "approved",
+  "location": { "lng": 49.612, "lat": 54.234 }
+}
+
+### List approved ideas
+GET {{baseUrl}}/api/ideas
+
+### Export approved ideas as GeoJSON
+GET {{baseUrl}}/api/export?format=geojson
+
+### Export approved ideas as CSV
+GET {{baseUrl}}/api/export?format=csv
+

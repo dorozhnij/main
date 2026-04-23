@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend-migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["npm", "run", "migrate:prod"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:-postgresql://app:app@postgres:5432/app}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: ${DATABASE_URL:-postgresql://app:app@postgres:5432/app}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
+    depends_on:
+      backend-migrate:
+        condition: service_completed_successfully
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:4000}
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
