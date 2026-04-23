@@ -10,7 +10,6 @@ Content-Type: application/json
 {
   "title": "Новая пешеходная зона",
   "description": "Сделать удобный маршрут между точками притяжения",
-  "status": "approved",
   "location": { "lng": 49.612, "lat": 54.234 }
 }
 

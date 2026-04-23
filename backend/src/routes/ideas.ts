@@ -15,7 +15,7 @@ ideasRouter.post("/ideas", async (req: Request, res: Response, next: NextFunctio
   const title = typeof req.body?.title === "string" ? req.body.title.trim() : "";
   const description =
     typeof req.body?.description === "string" ? req.body.description.trim() : null;
-  const status = "pending";
+  const status = "approved";
 
   const lng = req.body?.location?.lng;
   const lat = req.body?.location?.lat;

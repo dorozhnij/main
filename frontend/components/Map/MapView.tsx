@@ -594,12 +594,37 @@ export function MapView({ id, className }: MapViewProps) {
         })
       });
 
+      const payload = (await res.json().catch(() => null)) as
+        | { idea?: Idea; error?: string }
+        | null;
+
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(data?.error ?? `Request failed with ${res.status}`);
+        throw new Error(payload?.error ?? `Request failed with ${res.status}`);
       }
+
+      const created = payload?.idea;
+      if (created) {
+        const nextIdea: Idea = {
+          id: created.id,
+          title: created.title,
+          description: created.description,
+          lng: created.lng,
+          lat: created.lat
+        };
+        if (isWithinBbox(nextIdea.lng, nextIdea.lat)) {
+          const coords = borderRef.current?.features[0]?.geometry.coordinates ?? [];
+          const inside =
+            !borderRef.current || pointInMultiPolygon(nextIdea.lng, nextIdea.lat, coords);
+          if (inside) {
+            setIdeas((prev) => {
+              if (prev.some((i) => i.id === nextIdea.id)) return prev;
+              return [nextIdea, ...prev];
+            });
+          }
+        }
+      }
+
+      setError(null);
       setSelectedCoordinates(null);
       setAddMode("idle");
 
