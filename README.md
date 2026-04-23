@@ -46,6 +46,43 @@ docker compose -f docker-compose.prod.yml up --build -d
 
 `backend-seed` используется только в dev-стеке (`docker-compose.yml`) и не входит в production-compose.
 
+### Обновление прода через GitHub
+
+На сервере (пример директории: `/opt/dmtrgrad-masterplan`):
+
+```bash
+cd /opt/dmtrgrad-masterplan
+git pull --ff-only origin main
+docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml ps
+```
+
+Проверка:
+
+```bash
+curl -I https://xn--80addcduaf0adsfzdz.xn--p1ai
+curl -sS https://xn--80addcduaf0adsfzdz.xn--p1ai/health
+curl -sS "https://xn--80addcduaf0adsfzdz.xn--p1ai/api/export?format=csv" | sed -n '1,5p'
+```
+
+### Rollback (если обновление неудачное)
+
+```bash
+cd /opt/dmtrgrad-masterplan
+git log --oneline -n 5
+# выберите предыдущий стабильный commit hash:
+git checkout <stable_commit_hash>
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+После фикса проблемы можно вернуться на `main`:
+
+```bash
+git checkout main
+git pull --ff-only origin main
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
 ### Локальный старт (без Docker)
 
 Frontend:
