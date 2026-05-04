@@ -157,7 +157,7 @@ export default function Page() {
               <div className="mt-6">
                 <div
                   id="anketolog-frame-1023715"
-                  className="mx-auto w-full max-w-3xl min-h-[78svh] overflow-hidden rounded-3xl border border-[#E0E0E0] bg-white shadow-sm md:min-h-0 md:aspect-video"
+                  className="mx-auto w-full max-w-3xl min-h-[78svh] overflow-hidden rounded-3xl border border-[#E0E0E0] bg-white shadow-sm md:min-h-[85vh] lg:min-h-[88vh]"
                 />
                 <Script id="anketolog-loader" strategy="afterInteractive">
                   {`(function(d){var u='https://anketolog.ru/api/v2/frame/js/1023715?token=KWkW5HDD';var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src=u;d.body.appendChild(s);})(document);`}
